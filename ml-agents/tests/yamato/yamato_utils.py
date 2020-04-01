@@ -29,6 +29,7 @@ def run_standalone_build(
     verbose: bool = False,
     output_path: str = None,
     scene_path: str = None,
+    log_output_path: str = "Project/standalone_build.txt",
 ) -> int:
     """
     Run BuildStandalonePlayerOSX test to produce a player. The location defaults to Project/testPlayer.
@@ -44,8 +45,10 @@ def run_standalone_build(
         "-executeMethod",
         "MLAgents.StandaloneBuildTest.BuildStandalonePlayerOSX",
     ]
-    if verbose:
-        test_args += ["-logfile", "-"]
+
+    subprocess.run(["touch", f"{base_path}/{log_output_path}"])
+    test_args += ["-logfile", f"{base_path}/{log_output_path}"]
+
     if output_path is not None:
         test_args += ["--mlagents-build-output-path", output_path]
     if scene_path is not None:
@@ -54,6 +57,10 @@ def run_standalone_build(
 
     timeout = 30 * 60  # 30 minutes, just in case
     res: subprocess.CompletedProcess = subprocess.run(test_args, timeout=timeout)
+
+    if verbose or res.returncode != 0:
+        subprocess.run(["cat", f"{base_path}/{log_output_path}"])
+
     return res.returncode
 
 
@@ -108,6 +115,8 @@ def checkout_csharp_version(csharp_version):
     if csharp_version is None:
         return
     csharp_dirs = ["com.unity.ml-agents", "Project"]
+    subprocess.check_call(f"rm -rf Project/Library", shell=True)
+    subprocess.check_call(f"rm -rf com.unity.ml-agents", shell=True)
     for csharp_dir in csharp_dirs:
         subprocess.check_call(
             f"git checkout {csharp_version} -- {csharp_dir}", shell=True
@@ -120,6 +129,7 @@ def undo_git_checkout():
     """
     subprocess.check_call("git reset HEAD .", shell=True)
     subprocess.check_call("git checkout -- .", shell=True)
+    subprocess.check_call(f"rm -rf Project/Library", shell=True)
 
 
 def override_config_file(src_path, dest_path, **kwargs):
