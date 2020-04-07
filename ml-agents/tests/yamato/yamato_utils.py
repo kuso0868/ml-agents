@@ -124,6 +124,7 @@ def checkout_csharp_version(csharp_version):
         subprocess.check_call(
             f"git checkout {csharp_version} -- {csharp_dir}", shell=True
         )
+    subprocess.check_call("git clean -df", shell=True)
 
 
 def undo_git_checkout():
@@ -132,6 +133,8 @@ def undo_git_checkout():
     """
     subprocess.check_call("git reset HEAD .", shell=True)
     subprocess.check_call("git checkout -- .", shell=True)
+    # Clean up any untracked files after checkout.
+    subprocess.check_call("git clean -df", shell=True)
     # Ensure the cache isn't polluted with old compiled assemblies.
     subprocess.check_call(f"rm -rf Project/Library", shell=True)
 
