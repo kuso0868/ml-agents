@@ -114,9 +114,13 @@ def checkout_csharp_version(csharp_version):
     """
     if csharp_version is None:
         return
+
+    # Remove the package directory and the Library folder in order to ensure
+    # that the Project is clean.
+    subprocess.check_call(f"rm -rf Project/Library", shell=True)
+
     csharp_dirs = ["com.unity.ml-agents", "Project"]
     for csharp_dir in csharp_dirs:
-        subprocess.check_call(f"rm -rf {csharp_dir}", shell=True)
         subprocess.check_call(
             f"git checkout {csharp_version} -- {csharp_dir}", shell=True
         )
@@ -128,6 +132,7 @@ def undo_git_checkout():
     """
     subprocess.check_call("git reset HEAD .", shell=True)
     subprocess.check_call("git checkout -- .", shell=True)
+    # Ensure the cache isn't polluted with old compiled assemblies.
     subprocess.check_call(f"rm -rf Project/Library", shell=True)
 
 
