@@ -115,9 +115,8 @@ def checkout_csharp_version(csharp_version):
     if csharp_version is None:
         return
     csharp_dirs = ["com.unity.ml-agents", "Project"]
-    subprocess.check_call(f"rm -rf Project/Library", shell=True)
-    subprocess.check_call(f"rm -rf com.unity.ml-agents", shell=True)
     for csharp_dir in csharp_dirs:
+        subprocess.check_call(f"rm -rf {csharp_dir}", shell=True)
         subprocess.check_call(
             f"git checkout {csharp_version} -- {csharp_dir}", shell=True
         )
